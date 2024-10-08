@@ -1,0 +1,22 @@
+{
+    "initial_urls": ["https://developers.google.com/gmail"],
+    "url_patterns": [
+        "https://developers\\.google\\.com/gmail/api/guides",
+        "https://developers\\.google\\.com/gmail/imap/imap-smtp",
+        "https://developers\\.google\\.com/gmail/imap/imap-smtp",
+        "https://developers\\.google\\.com/gmail/postmaster",
+        "https://developers\\.google\\.com/gmail/design",
+        "https://developers\\.google\\.com/gmail.*",
+        "https://developers\\.google\\.com/workspace/add-ons/gmail.*",
+        "https://developers\\.google\\.com/apps-script/reference/gmail.*"
+    ],
+    "ignore_patterns": [
+        "https://developer\\.chrome\\.com/docs/extensions/reference/api/.*#.*",
+        "https://developer\\.chrome\\.com/docs/extensions/reference/api/.*\\?hl=(?!zh-cn).*",
+        "https://developer\\.chrome\\.com/docs/extensions/mv2/.*",
+        ".*\\.(js|css|png|jpg|jpeg|gif|svg)$"
+    ],
+    "max_urls": 100,
+    "max_workers": 10,
+    "crawl_delay": 1
+}
