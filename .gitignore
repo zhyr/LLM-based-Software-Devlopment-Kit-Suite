@@ -38,4 +38,4 @@ next-env.d.ts
 
 # Adding theb exit
 /.contentlayer/*
-CODE_OF_CONDUCT.md
+CODE_OF_CONDUCT.md.DS_Store
