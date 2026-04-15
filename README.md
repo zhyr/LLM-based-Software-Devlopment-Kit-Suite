@@ -13,3 +13,29 @@ develop some tools for intelligence software development based LLM, such as cont
 ## 4，context rebuilder for different model API
 - rewrite for knowledge enhancement and infomation strenthen
 _ follow the Yueli KGM context structure by five semantic layers
+
+## 5,git-tidy 如何使用？
+
+#### 方式 A：直接运行
+你可以指定任何目录进行清理：
+```bash
+~/git-tidy.sh ~/work      # 清理工作目录
+~/git-tidy.sh .           # 清理当前目录
+```
+
+#### 方式 B：变成全局指令（推荐）
+如果你希望在任何地方直接输入 `git-tidy` 就能用，可以执行：
+```bash
+sudo mv ~/git-tidy.sh /usr/local/bin/git-tidy
+```
+之后你只需要输入：
+```bash
+git-tidy
+```
+
+报错和冗余输出都重定向到了 `/tmp/git-tidy.log`，保持终端界面整洁。
+
+这个工具现在非常适合处理你这种拥有大量微服务或多个鸿蒙/前端模块的开发环境。
+
+## 6,code agent tools
+[统计分析到处本地coding agent的prompt和历史记录](https://github.com/zhyr/Al-exporter)
