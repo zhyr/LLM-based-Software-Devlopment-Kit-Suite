@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mermaid 图形渲染器</title>
-    <meta name="description" content="Yueli Mermaid 图形渲染器：在线输入 Mermaid 代码，实时渲染流程图、时序图、甘特图、思维导图等，可缩放与适应宽度，支持一键复制与示例预设。">
+    <meta name="description" content="面向 LLM / Chatbot 输出的图形预览：Mermaid、SVG、KaTeX 数学；围栏代码与 %% format 指令；缩放与示例。节点默认无填充仅描边。">
     <meta name="keywords" content="Mermaid, 流程图, 时序图, 甘特图, 思维导图, 在线渲染, 渲染器, Yueli">
     <meta name="robots" content="index,follow">
     <link rel="canonical" href="https://www.yueli.com/transform-mermaid.html">
@@ -32,7 +32,7 @@
         "@type": "Organization",
         "name": "Yueli"
       },
-      "description": "在线输入 Mermaid 代码实时渲染流程图/时序图/甘特图/思维导图等，支持缩放与适应宽度。"
+      "description": "面向 LLM 与 Chatbot 输出的图形预览：Mermaid、SVG、KaTeX；支持缩放与示例，节点默认透明填充。"
     }
     </script>
     <script src="./js/vendor/mermaid.min.js" onerror="window.__mermaidScriptLoadFailed = true"></script>
@@ -334,6 +334,35 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
+        /* 节点/子图方块：无填充（与 themeVariables 一致；饼图扇区 .pieCircle 除外） */
+        .preview-area svg {
+            background: transparent;
+        }
+        .preview-area svg g.node rect,
+        .preview-area svg g.node circle,
+        .preview-area svg g.node ellipse,
+        .preview-area svg g.node polygon,
+        .preview-area svg g.node path,
+        .preview-area svg .node rect,
+        .preview-area svg .node circle,
+        .preview-area svg .node polygon,
+        .preview-area svg .cluster rect,
+        .preview-area svg g.cluster rect,
+        .preview-area svg g.classGroup rect,
+        .preview-area svg g.actor rect,
+        .preview-area svg .actor rect {
+            fill: transparent !important;
+        }
+
+        /* subgraph：去掉外层容器描边（否则会被下方全局 rect stroke-width 再画一遍） */
+        .preview-area svg g.cluster rect,
+        .preview-area svg .cluster rect,
+        .preview-area svg g.cluster path,
+        .preview-area svg g.cluster polygon {
+            stroke: none !important;
+            stroke-width: 0 !important;
+        }
+
         /* 确保节点样式与markdown渲染一致 */
         .preview-area svg .node rect,
         .preview-area svg .node circle,
@@ -655,6 +684,13 @@
             }
         }
 
+        /**
+         * LLM / Chatbot 输出覆盖说明（预览器能力，非「类型枚举上限」）：
+         * - 输入形态：```mermaid 围栏、裸 Mermaid、首行 %% format: mermaid|svg|latex、原始 SVG、KaTeX 数学。
+         * - Mermaid：由当前 js/vendor/mermaid.min.js 版本决定支持范围；本页经 mermaid.render 统一渲染。
+         *   detectType / mermaidTypes 仅用于启发式修正与「未知类型」提示，未列入的关键字仍可能成功渲染。
+         * - 缺口：少数图种（如部分 C4、architecture-beta、实验语法）随版本差异可能失败；饼图扇区依赖配色而非「方块」填充。
+         */
         function initMermaid(theme = 'default') {
             if (!window.mermaid) return;
             try {
@@ -713,84 +749,91 @@
                     logLevel: 'error',
                     maxTextSize: 10000,
                     fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-                    // 自定义配色方案，与markdown渲染样式保持一致
+                    /* 节点/方块：无填充（transparent），保留描边与文字，便于贴合聊天区白底预览 */
                     themeVariables: {
+                        background: 'transparent',
+                        mainBkg: 'transparent',
+                        secondBkg: 'transparent',
                         primaryColor: '#44bdf7',
                         primaryTextColor: '#333333',
                         primaryBorderColor: '#44bdf7',
                         lineColor: '#44bdf7',
-                        secondaryColor: '#f0f9ff',
-                        tertiaryColor: '#f8fafc',
-                        // 节点样式
-                        nodeBkg: '#f0f9ff',
+                        secondaryColor: 'transparent',
+                        tertiaryColor: 'transparent',
+                        nodeBkg: 'transparent',
                         nodeBorder: '#44bdf7',
-                        clusterBkg: '#f8fafc',
-                        clusterBorder: '#e2e8f0',
-                        // 默认样式
+                        clusterBkg: 'transparent',
+                        clusterBorder: 'transparent',
                         defaultLinkColor: '#44bdf7',
                         titleColor: '#333333',
-                        edgeLabelBackground: '#ffffff',
-                        // 状态图
-                        stateBkg: '#f0f9ff',
+                        edgeLabelBackground: 'transparent',
+                        stateBkg: 'transparent',
                         stateBorder: '#44bdf7',
-                        labelBkg: '#ffffff',
-                        labelBorder: '#e2e8f0',
-                        // 类图
+                        labelBkg: 'transparent',
+                        labelBorder: '#94a3b8',
                         classText: '#333333',
-                        classBkg: '#f0f9ff',
+                        classBkg: 'transparent',
                         classBorder: '#44bdf7',
-                        // 时序图
-                        actorBkg: '#f0f9ff',
+                        actorBkg: 'transparent',
                         actorBorder: '#44bdf7',
                         actorTextColor: '#333333',
                         actorLineColor: '#44bdf7',
                         signalColor: '#44bdf7',
                         signalTextColor: '#333333',
-                        labelBoxBkgColor: '#ffffff',
-                        labelBoxBorderColor: '#e2e8f0',
+                        labelBoxBkgColor: 'transparent',
+                        labelBoxBorderColor: '#94a3b8',
                         labelTextColor: '#333333',
                         loopTextColor: '#333333',
                         noteBorderColor: '#44bdf7',
-                        noteBkgColor: '#fef3c7',
+                        noteBkgColor: 'transparent',
                         noteTextColor: '#333333',
-                        // 甘特图
-                        sectionBkgColor: '#f0f9ff',
-                        sectionBkgColor2: '#f8fafc',
+                        sectionBkgColor: 'transparent',
+                        sectionBkgColor2: 'transparent',
                         gridColor: '#e2e8f0',
                         taskBorderColor: '#44bdf7',
-                        taskBkgColor: '#f0f9ff',
+                        taskBkgColor: 'transparent',
                         taskTextColor: '#333333',
                         taskTextOutsideColor: '#333333',
-                        // 饼图
                         pieTitleTextSize: '16px',
                         pieTitleTextColor: '#333333',
                         pieSectionTextColor: '#333333',
                         pieSectionTextSize: '14px',
                         pieLegendTextColor: '#333333',
                         pieLegendTextSize: '12px',
-                        // 思维导图
-                        mindmapNodeColor: '#f0f9ff',
+                        /* 饼图为扇区着色，非方块填充；保留可区分浅色（非大块背景） */
+                        pie1: '#e0f2fe',
+                        pie2: '#dbeafe',
+                        pie3: '#cffafe',
+                        pie4: '#d1fae5',
+                        pie5: '#fef3c7',
+                        pie6: '#fde68a',
+                        pie7: '#fecaca',
+                        pie8: '#e9d5ff',
+                        pie9: '#fbcfe8',
+                        pie10: '#a5f3fc',
+                        pie11: '#bfdbfe',
+                        pie12: '#c7d2fe',
+                        mindmapNodeColor: 'transparent',
                         mindmapNodeBorderColor: '#44bdf7',
-                        mindmapClusterBkg: '#f8fafc',
-                        mindmapClusterBorder: '#e2e8f0',
+                        mindmapClusterBkg: 'transparent',
+                        mindmapClusterBorder: '#94a3b8',
                         mindmapNodeTextColor: '#333333',
-                        // 实体关系图
-                        erBkg: '#f0f9ff',
+                        erBkg: 'transparent',
                         erBorder: '#44bdf7',
-                        erLabelBkg: '#ffffff',
-                        erLabelBorder: '#e2e8f0',
+                        erLabelBkg: 'transparent',
+                        erLabelBorder: '#94a3b8',
                         erLabelTextColor: '#333333',
-                        erEntityBkg: '#f0f9ff',
+                        erEntityBkg: 'transparent',
                         erEntityBorder: '#44bdf7',
-                        erEntityLabelBkg: '#ffffff',
-                        erEntityLabelBorder: '#e2e8f0',
+                        erEntityLabelBkg: 'transparent',
+                        erEntityLabelBorder: '#94a3b8',
                         erEntityLabelTextColor: '#333333',
-                        erRelationshipBkg: '#f8fafc',
-                        erRelationshipBorder: '#e2e8f0',
-                        erRelationshipLabelBkg: '#ffffff',
+                        erRelationshipBkg: 'transparent',
+                        erRelationshipBorder: '#94a3b8',
+                        erRelationshipLabelBkg: 'transparent',
                         erRelationshipLabelBorder: '#e2e8f0',
                         erRelationshipLabelTextColor: '#333333',
-                        erAttributeBkg: '#ffffff',
+                        erAttributeBkg: 'transparent',
                         erAttributeBorder: '#e2e8f0',
                         erAttributeTextColor: '#333333'
                     }
