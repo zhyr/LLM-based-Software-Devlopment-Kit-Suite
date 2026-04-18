@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown 编辑器</title>
+  <script src="js/vendor/showdown.min.js"></script>
+  <script src="js/vendor/html2pdf.bundle.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .editor-container {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+      height: calc(100vh - 64px - 2px);
+      width: 100%;
+      margin: 0;
+      background-color: #ffffff;
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    .editor-pane {
+      display: flex;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .editor-left-pane {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      width: 45%;
+    }
+
+    .btn-import-txt {
+      background-color: #d97706;
+      color: white;
+    }
+
+    .btn-import-txt:hover {
+      background-color: #b45309;
+    }
+
+    .btn-import-log {
+      background-color: #475569;
+      color: white;
+    }
+
+    .btn-import-log:hover {
+      background-color: #334155;
+    }
+
+    .editor-textarea-wrapper {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .editor-textarea {
+      width: 100%;
+      height: 100%;
+      padding: 1rem;
+      padding-bottom: calc(1rem + 300px);
+      resize: none;
+      outline: none;
+      border: none;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1f2937;
+      background-color: #ffffff;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      will-change: scroll-position;
+      transform: translateZ(0);
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+
+    .editor-textarea::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .editor-textarea::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+
+    .editor-textarea::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .editor-textarea::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .editor-textarea:focus {
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3);
+    }
+
+    .editor-textarea::placeholder {
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    .resizer {
+      cursor: col-resize;
+      height: 100%;
+      width: 6px;
+      background-color: #f3f4f6;
+      user-select: none;
+      transition: background-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .resizer:hover {
+      background-color: #60a5fa;
+    }
+
+    .markdown-preview {
+      overflow: auto;
+      background-color: #ffffff;
+      padding: 2rem;
+      padding-bottom: calc(2rem + 200px);
+      border-left: 1px solid #e5e7eb;
+      line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      height: 100%;
+      flex: 1;
+      overscroll-behavior: contain;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      will-change: scroll-position;
+      transform: translateZ(0);
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+
+    .markdown-preview::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .markdown-preview::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+
+    .markdown-preview::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .markdown-preview::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .markdown-preview h1 {
+      font-size: 2em;
+      font-weight: 600;
+      margin: 1.5em 0 0.8em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid #eaecef;
+    }
+
+    .markdown-preview h2 {
+      font-size: 1.5em;
+      font-weight: 600;
+      margin: 1.2em 0 0.6em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid #eaecef;
+    }
+
+    .markdown-preview h3 {
+      font-size: 1.25em;
+      font-weight: 600;
+      margin: 1em 0 0.5em;
+    }
+
+    .markdown-preview p {
+      margin: 0.8em 0;
+      line-height: 1.6;
+    }
+
+    .markdown-preview ul, .markdown-preview ol {
+      padding-left: 2em;
+      margin: 0.8em 0;
+    }
+
+    .markdown-preview li {
+      margin: 0.3em 0;
+    }
+
+    .markdown-preview blockquote {
+      margin: 1em 0;
+      padding: 0.5em 1em;
+      color: #6b7280;
+      border-left: 0.25em solid #60a5fa;
+      background-color: #f3f4f6;
+    }
+
+    .markdown-preview hr {
+      height: 2px;
+      margin: 2em 0;
+      background-color: #e5e7eb;
+      border: none;
+    }
+
+    .markdown-preview table {
+      border-collapse: collapse;
+      margin: 1em 0;
+      width: 100%;
+      font-size: 0.9em;
+    }
+
+    .markdown-preview table th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .markdown-preview table th,
+    .markdown-preview table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.75em 1em;
+    }
+
+    .markdown-preview table tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    .markdown-preview table tr:hover {
+      background-color: #f3f4f6;
+    }
+
+    .markdown-preview img {
+      max-width: 100%;
+      margin: 1em 0;
+      border-radius: 4px;
+    }
+
+    .markdown-preview code {
+      background-color: #f3f4f6;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.875em;
+    }
+
+    .markdown-preview pre {
+      background-color: #f3f4f6;
+      padding: 1em;
+      border-radius: 6px;
+      overflow: auto;
+      margin: 1em 0;
+    }
+
+    .markdown-preview pre code {
+      background-color: transparent;
+      padding: 0;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+
+    .markdown-preview input[type="checkbox"] {
+      margin-right: 0.5em;
+    }
+
+    .markdown-preview .task-list-item {
+      list-style-type: none;
+      margin-left: -1.5em;
+    }
+
+    .fixed-bottom-bar {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      background-color: white;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-import {
+      background-color: #6366f1;
+      color: white;
+    }
+
+    .btn-import:hover {
+      background-color: #4f46e5;
+    }
+
+    .btn-save {
+      background-color: #eab308;
+      color: white;
+    }
+
+    .btn-save:hover {
+      background-color: #ca8a04;
+    }
+
+    .btn-export {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .btn-export:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-clear {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .btn-clear:hover {
+      background-color: #dc2626;
+    }
+
+    .btn-pdf {
+      background-color: #0d9488;
+      color: white;
+    }
+
+    .btn-pdf:hover {
+      background-color: #0f766e;
+    }
+
+    .btn-refresh-preview {
+      background-color: #64748b;
+      color: white;
+    }
+
+    .btn-refresh-preview:hover {
+      background-color: #475569;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 96px;
+      max-width: min(90vw, 480px);
+      padding: 12px 24px;
+      border-radius: 6px;
+      background-color: #10b981;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+      text-align: center;
+      box-sizing: border-box;
+      animation: toastIn 0.3s ease-out forwards;
+    }
+
+    .toast.error {
+      background-color: #ef4444;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 16px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .spinner {
+      border: 3px solid #f3f4f6;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-container">
+    <div class="editor-pane">
+      <div class="editor-left-pane" id="leftPane">
+        <div class="editor-textarea-wrapper">
+          <textarea 
+            class="editor-textarea" 
+            id="markdownInput" 
+            placeholder="在这里输入 Markdown 内容...
+
+# 标题示例
+## 二级标题
+
+**粗体文字** *斜体文字*
+
+- 列表项 1
+- 列表项 2
+
+```javascript
+// 代码块示例
+console.log('Hello World');
+```
+
+> 引用文字
+
+[链接文字](https://example.com)"></textarea>
+        </div>
+      </div>
+
+      <div class="resizer" id="resizer"></div>
+
+      <div class="markdown-preview" id="preview"></div>
+    </div>
+  </div>
+
+  <div class="fixed-bottom-bar">
+    <div class="button-group">
+      <input type="file" id="mdFileInput" accept=".md,.markdown,text/markdown" hidden />
+      <button type="button" class="btn-import" id="btnImportMd">选择并导入 MD</button>
+      <input type="file" id="txtFileInput" accept=".txt,text/plain" hidden />
+      <button type="button" class="btn-import-txt" id="btnImportTxt" title="导入 .txt 纯文本">导入 TXT</button>
+      <input type="file" id="logFileInput" accept=".log,text/plain" hidden />
+      <button type="button" class="btn-import-log" id="btnImportLog" title="导入 .log 日志">导入 LOG</button>
+    </div>
+    <div class="button-group">
+      <button class="btn-save" onclick="handleSave()">保存到本地</button>
+      <button class="btn-export" type="button" onclick="handleExport()">用 HTML 打开</button>
+      <button class="btn-pdf" type="button" id="btnPdf" onclick="handleExportPdf()">生成 PDF</button>
+      <button class="btn-refresh-preview" type="button" onclick="handleRefreshPreview()">刷新预览</button>
+      <button class="btn-clear" onclick="handleClear()">清空内容</button>
+    </div>
+  </div>
+
+  <script>
+    // 初始化 Showdown 转换器
+    const converter = new showdown.Converter({
+      tables: true,
+      tasklists: true,
+      strikethrough: true,
+      emoji: true,
+      underline: true,
+      ghCodeBlocks: true,
+      smoothLivePreview: true,
+      parseImgDimensions: true,
+      simplifiedAutoLink: true,
+      ghCompatibleHeaderId: true,
+      backslashEscapesHTMLTags: true
+    });
+
+    // DOM 元素
+    const markdownInput = document.getElementById('markdownInput');
+    const preview = document.getElementById('preview');
+    const leftPane = document.getElementById('leftPane');
+    const resizer = document.getElementById('resizer');
+    const mdFileInput = document.getElementById('mdFileInput');
+    const btnImportMd = document.getElementById('btnImportMd');
+    const txtFileInput = document.getElementById('txtFileInput');
+    const logFileInput = document.getElementById('logFileInput');
+    const btnImportTxt = document.getElementById('btnImportTxt');
+    const btnImportLog = document.getElementById('btnImportLog');
+
+    // 防抖函数
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // 更新预览
+    function updatePreview() {
+      const markdownText = markdownInput.value;
+      const html = converter.makeHtml(markdownText);
+      preview.innerHTML = html;
+    }
+
+    // 防抖的预览更新
+    const debouncedUpdatePreview = debounce(updatePreview, 300);
+
+    // 监听输入
+    markdownInput.addEventListener('input', debouncedUpdatePreview);
+
+    // 初始加载
+    window.addEventListener('load', () => {
+      // 从 localStorage 加载内容
+      const savedContent = localStorage.getItem('markdownContent');
+      if (savedContent) {
+        markdownInput.value = savedContent;
+        updatePreview();
+      } else {
+        updatePreview();
+      }
+    });
+
+    // 自动保存到 localStorage
+    const autoSave = debounce(() => {
+      localStorage.setItem('markdownContent', markdownInput.value);
+    }, 1000);
+
+    markdownInput.addEventListener('input', autoSave);
+
+    function importTextFromFile(file, fileInput, toastMessageBuilder) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = typeof reader.result === 'string' ? reader.result : '';
+        const hasContent = markdownInput.value.trim().length > 0;
+        if (hasContent && !confirm('将用所选文件覆盖当前编辑区内容，是否继续？')) {
+          fileInput.value = '';
+          return;
+        }
+        markdownInput.value = text;
+        localStorage.setItem('markdownContent', text);
+        updatePreview();
+        showToast(toastMessageBuilder(file.name));
+        fileInput.value = '';
+      };
+      reader.onerror = () => {
+        showToast('读取文件失败', true);
+        fileInput.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    btnImportMd.addEventListener('click', () => {
+      mdFileInput.click();
+    });
+
+    btnImportTxt.addEventListener('click', () => {
+      txtFileInput.click();
+    });
+
+    btnImportLog.addEventListener('click', () => {
+      logFileInput.click();
+    });
+
+    mdFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      importTextFromFile(file, mdFileInput, (name) => '已导入 Markdown：' + name);
+    });
+
+    txtFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      importTextFromFile(file, txtFileInput, (name) => '已导入 TXT 文件：' + name);
+    });
+
+    logFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      importTextFromFile(file, logFileInput, (name) => '已导入 LOG 文件：' + name);
+    });
+
+    // 调整大小功能
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      startX = e.clientX;
+      startWidth = leftPane.offsetWidth;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      
+      const containerWidth = leftPane.parentElement.offsetWidth;
+      const deltaX = e.clientX - startX;
+      const newWidth = startWidth + deltaX;
+      const newWidthPercent = (newWidth / containerWidth) * 100;
+      
+      if (newWidthPercent >= 20 && newWidthPercent <= 80) {
+        leftPane.style.width = newWidthPercent + '%';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+
+    // Toast 提示
+    function showToast(message, isError = false) {
+      const toast = document.createElement('div');
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'toastIn 0.3s ease-out reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // 按钮处理函数
+    function handleSave() {
+      const content = markdownInput.value;
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'document.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Markdown 文件已保存');
+    }
+
+    function buildStandaloneHtmlDocument() {
+      const bodyHtml = converter.makeHtml(markdownInput.value);
+      return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>导出的文档</title>
+  <style>
+    body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+    h1 { font-size: 2em; font-weight: 600; margin: 1.5em 0 0.8em; padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; }
+    h2 { font-size: 1.5em; font-weight: 600; margin: 1.2em 0 0.6em; padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; }
+    h3 { font-size: 1.25em; font-weight: 600; margin: 1em 0 0.5em; }
+    p { margin: 0.8em 0; }
+    code { background-color: #f3f4f6; padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; font-size: 0.875em; }
+    pre { background-color: #f3f4f6; padding: 1em; border-radius: 6px; overflow: auto; margin: 1em 0; }
+    pre code { background-color: transparent; padding: 0; }
+    blockquote { margin: 1em 0; padding: 0.5em 1em; color: #6b7280; border-left: 0.25em solid #60a5fa; background-color: #f3f4f6; }
+    table { border-collapse: collapse; margin: 1em 0; width: 100%; }
+    table th { background-color: #f3f4f6; font-weight: 600; text-align: left; }
+    table th, table td { border: 1px solid #e5e7eb; padding: 0.75em 1em; }
+    img { max-width: 100%; margin: 1em 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+${bodyHtml}
+</body>
+</html>`;
+    }
+
+    function handleExport() {
+      const html = buildStandaloneHtmlDocument();
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!win) {
+        URL.revokeObjectURL(url);
+        showToast('无法打开新标签页，请检查浏览器弹窗拦截设置', true);
+        return;
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 120000);
+      showToast('已在新标签页中打开 HTML');
+    }
+
+    async function handleExportPdf() {
+      if (typeof html2pdf === 'undefined') {
+        showToast('PDF 库未加载，请确认 js/vendor/html2pdf.bundle.min.js 存在且路径正确', true);
+        return;
+      }
+
+      updatePreview();
+
+      const btn = document.getElementById('btnPdf');
+      btn.disabled = true;
+
+      try {
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: 'document.pdf',
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        await html2pdf().set(opt).from(preview).save();
+        showToast('PDF 已生成');
+      } catch (err) {
+        showToast('生成 PDF 失败', true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function handleRefreshPreview() {
+      updatePreview();
+      showToast('预览已刷新');
+    }
+
+    function handleClear() {
+      if (confirm('确定要清空所有内容吗？此操作无法撤销。')) {
+        markdownInput.value = '';
+        localStorage.removeItem('markdownContent');
+        updatePreview();
+        showToast('内容已清空');
+      }
+    }
+
+    // 键盘快捷键
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + S 保存
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+      // Ctrl/Cmd + E 新标签页打开 HTML
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        handleExport();
+      }
+    });
+  </script>
+</body>
+</html>
