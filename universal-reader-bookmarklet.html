@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Universal Reader Bookmarklet</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:linear-gradient(140deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;color:#1a1a1a}
+.wrap{max-width:780px;margin:0 auto;padding:44px 20px 60px}
+.card{background:#fff;border-radius:20px;padding:36px 40px;box-shadow:0 24px 64px rgba(0,0,0,.25);margin-bottom:18px}
+.badge{display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 11px;border-radius:20px;margin-bottom:14px}
+.hero h1{font-size:2.4em;font-weight:800;line-height:1.2;margin-bottom:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:16px;color:#555;line-height:1.65;max-width:540px}
+.notice{margin-top:10px;font-size:13px;color:#7c3aed;background:#f5f0ff;padding:8px 12px;border-radius:8px;border-left:3px solid #8b5cf6;line-height:1.6}
+.install-box{background:linear-gradient(135deg,#f0f0ff,#f8f0ff);border:2px dashed #c4b5fd;border-radius:14px;padding:28px 24px;text-align:center;margin:28px 0 0}
+.install-hint{font-size:13px;color:#7c3aed;font-weight:600;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:6px}
+.bookmark-pill{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff!important;font-size:17px;font-weight:700;padding:13px 32px;border-radius:50px;text-decoration:none;cursor:grab;box-shadow:0 6px 24px rgba(99,102,241,.45);transition:transform .15s,box-shadow .15s;user-select:none;-webkit-user-drag:element}
+.bookmark-pill:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(99,102,241,.55)}
+.bookmark-pill:active{cursor:grabbing;transform:scale(.97)}
+.install-note{font-size:12.5px;color:#9ca3af;margin-top:14px;line-height:1.6}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:28px}
+.feat{padding:18px;background:#f9f8ff;border-radius:12px;border:1px solid #ede9fe}
+.feat .ic{font-size:22px;margin-bottom:6px}
+.feat h3{font-size:13px;font-weight:700;margin-bottom:4px}
+.feat p{font-size:12.5px;color:#6b7280;line-height:1.5}
+.steps-title{font-size:1.2em;font-weight:700;margin-bottom:20px}
+.step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f3f3}
+.step:last-child{border-bottom:none}
+.snum{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.stxt h4{font-size:14px;font-weight:600;margin-bottom:3px}
+.stxt p{font-size:13px;color:#6b7280;line-height:1.55}
+kbd{background:#f0f0f0;padding:1px 6px;border-radius:4px;font-size:12px;border:1px solid #ddd}
+details summary{cursor:pointer;font-weight:600;font-size:14px;padding:14px;background:#f8f8f8;border-radius:10px;user-select:none;list-style:none;display:flex;align-items:center;gap:8px;color:#444}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'';font-size:10px;transition:transform .2s;color:#8b5cf6}
+details[open] summary::before{transform:rotate(90deg)}
+#src-pre{background:#0d1117;color:#c9d1d9;padding:18px;border-radius:0 0 10px 10px;overflow:auto;font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-all;max-height:260px;font-family:'SF Mono','Fira Code',monospace}
+.src-btn{margin-top:8px;padding:7px 16px;background:#0d1117;color:#8b9cf4;border:1px solid #30363d;border-radius:6px;cursor:pointer;font-size:12.5px;font-family:inherit}
+.src-btn:hover{background:#161b22}
+.footer{text-align:center;color:rgba(255,255,255,.4);font-size:12.5px;padding:16px 0;line-height:1.8}
+.footer a{color:rgba(255,255,255,.55);text-decoration:none}
+.footer a:hover{color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="badge">Universal Reader</div>
+    <div class="hero">
+      <h1>Smart Reader</h1>
+      <p>Universal bookmarklet for clean reading experience - extracts main content, converts to markdown, with smart fallback strategies for maximum compatibility.</p>
+      <div class="notice">
+        <strong>Hybrid Approach:</strong> Local extraction first, then Jina API fallback<br>
+        <strong>CSP-Safe:</strong> Works on sites with strict security policies<br>
+        <strong>Smart Filtering:</strong> Automatically removes navigation, ads, and non-core content
+      </div>
+    </div>
+    <div class="install-box">
+      <div class="install-hint"><span>Drag to bookmarks</span></div>
+      <a id="bml" class="bookmark-pill">Smart Reader</a>
+      <div class="install-note">
+        Drag button to bookmarks bar or right-click & bookmark<br>
+        Click on any page to activate · Press Esc to exit
+      </div>
+    </div>
+    <div class="features">
+      <div class="feat"><div class="ic">Local First</div><h3>Smart Local Extraction</h3><p>Uses browser's built-in reader mode APIs and DOM analysis for instant results</p></div>
+      <div class="feat"><div class="ic">Fallback</div><h3>Jina API Backup</h3><p>Automatic fallback to Jina Reader when local extraction fails</p></div>
+      <div class="feat"><div class="ic">CSP Safe</div><h3>Security Compliant</h3><p>Works on sites with strict Content Security Policies</p></div>
+      <div class="feat"><div class="ic">Clean UI</div><h3>Beautiful Reading</h3><p>Dark mode, adjustable font size, clean typography</p></div>
+      <div class="feat"><div class="ic">🌐 AI Translate</div><h3>Gemini Translation</h3><p>High-quality translation to Chinese using Google Gemini AI</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="steps-title">How to Use</div>
+    <div class="step"><div class="snum">1</div><div class="stxt"><h4>Install Bookmark</h4><p>Drag the Smart Reader button to your bookmarks bar.</p></div></div>
+    <div class="step"><div class="snum">2</div><div class="stxt"><h4>Activate Reader</h4><p>Click the bookmark on any article page to start reading mode.</p></div></div>
+    <div class="step"><div class="snum">3</div><div class="stxt"><h4>Copy Markdown</h4><p>Click "Copy Markdown" to copy the clean content to clipboard.</p></div></div>
+    <div class="step"><div class="snum">4</div><div class="stxt"><h4>Translate to Chinese</h4><p>Click "🌐 中文" to translate content using Google Gemini AI.</p></div></div>
+    <div class="step"><div class="snum">5</div><div class="stxt"><h4>Exit Reader</h4><p>Press Esc, click Close, or click the bookmark again to exit.</p></div></div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>View Source Code</summary>
+      <pre id="src-pre">Generating...</pre>
+      <button class="src-btn" id="copy-src">Copy Source Code</button>
+    </details>
+  </div>
+</div>
+
+<div class="footer">
+  Built with hybrid extraction strategy and Gemini AI translation
+</div>
+
+<script>
+/* Universal Reader Bookmarklet - Hybrid Approach with Gemini Translation */
+function universalReader() {
+  var ID = '__universal_reader__';
+  if (document.getElementById(ID)) { document.getElementById(ID).remove(); return; }
+  
+  var raw = '', sz = 18, currentMethod = '';
+
+  /* DOM helpers */
+  function mk(t) { return document.createElement(t); }
+  function ap(p) { for (var i=1;i<arguments.length;i++) p.appendChild(arguments[i]); return p; }
+
+  /* Smart content extraction - multiple strategies */
+  function extractContent() {
+    // Strategy 1: Try browser's built-in reader mode (if available)
+    if ('readability' in window && window.readability) {
+      try {
+        var doc = new Readability(document.cloneNode(true)).parse();
+        if (doc && doc.content) {
+          currentMethod = 'Readability API';
+          return htmlToMarkdown(doc.content);
+        }
+      } catch (e) { console.log('Readability failed:', e); }
+    }
+
+    // Strategy 2: Use article element
+    var article = document.querySelector('article');
+    if (article) {
+      currentMethod = 'Article Element';
+      return extractNodeContent(article);
+    }
+
+    // Strategy 3: Smart content detection
+    var contentSelectors = [
+      'main', '[role="main"]', '.content', '.post-content', '.entry-content',
+      '.article-content', '.story-content', '.post-body', '.entry-body',
+      '.article-body', '.content-body', '.post', '.article'
+    ];
+    
+    for (var i = 0; i < contentSelectors.length; i++) {
+      var el = document.querySelector(contentSelectors[i]);
+      if (el && el.textContent.trim().length > 500) {
+        currentMethod = 'Smart Detection (' + contentSelectors[i] + ')';
+        return extractNodeContent(el);
+      }
+    }
+
+    // Strategy 4: Heuristic extraction
+    var paragraphs = document.querySelectorAll('p');
+    if (paragraphs.length > 3) {
+      var content = '';
+      for (var i = 0; i < Math.min(paragraphs.length, 50); i++) {
+        var p = paragraphs[i];
+        var text = p.textContent.trim();
+        if (text.length > 20 && !isNavigationText(text)) {
+          content += text + '\n\n';
+        }
+      }
+      if (content.length > 200) {
+        currentMethod = 'Heuristic Extraction';
+        return content.trim();
+      }
+    }
+
+    return null;
+  }
+
+  /* Extract content from a DOM node without using innerHTML */
+  function extractNodeContent(node) {
+    // Use TreeWalker for safe text extraction
+    var content = '';
+    var walker = document.createTreeWalker(
+      node,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function(node) {
+          // Skip script, style, and navigation elements
+          if (node.nodeType === 1) {
+            var tagName = node.tagName.toLowerCase();
+            if (['script', 'style', 'nav', 'header', 'footer', 'aside'].includes(tagName)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (['a', 'button', 'input', 'select'].includes(tagName)) {
+              // Check if it's likely navigation
+              var text = node.textContent.trim();
+              if (text.length < 30 || isNavigationText(text)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+            }
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      },
+      false
+    );
+    
+    var currentNode;
+    while (currentNode = walker.nextNode()) {
+      if (currentNode.nodeType === 3) { // Text node
+        var text = currentNode.textContent.trim();
+        if (text && !isNavigationText(text)) {
+          content += text + '\n\n';
+        }
+      } else if (currentNode.nodeType === 1) { // Element node
+        var tagName = currentNode.tagName.toLowerCase();
+        var text = currentNode.textContent.trim();
+        
+        if (text && text.length > 20) {
+          // Add markdown formatting based on element type
+          switch (tagName) {
+            case 'h1': content += '# ' + text + '\n\n'; break;
+            case 'h2': content += '## ' + text + '\n\n'; break;
+            case 'h3': content += '### ' + text + '\n\n'; break;
+            case 'h4': content += '#### ' + text + '\n\n'; break;
+            case 'h5': content += '##### ' + text + '\n\n'; break;
+            case 'h6': content += '###### ' + text + '\n\n'; break;
+            case 'p': content += text + '\n\n'; break;
+            case 'li': content += '- ' + text + '\n'; break;
+            default: content += text + '\n\n'; break;
+          }
+        }
+      }
+    }
+    
+    return content.replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  /* Check if text is likely navigation/menu content */
+  function isNavigationText(text) {
+    var navKeywords = ['menu', 'home', 'about', 'contact', 'login', 'register', 'search', 'cart', 'checkout', 'subscribe', 'follow', 'share', 'comment', 'reply', 'edit', 'delete', 'report', 'flag', 'more', 'less', 'next', 'prev', 'previous', 'back', 'forward', 'close', 'cancel', 'submit', 'save', 'continue', 'skip', 'view', 'show', 'hide'];
+    var lowerText = text.toLowerCase();
+    return navKeywords.some(function(keyword) { return lowerText.includes(keyword); }) || text.length < 15;
+  }
+
+  /* Simple HTML to Markdown converter - CSP safe version */
+  function htmlToMarkdown(html) {
+    // Create a template element to parse HTML without innerHTML
+    var template = document.createElement('template');
+    try {
+      template.innerHTML = html;
+    } catch (e) {
+      // Fallback for strict CSP: create elements manually
+      return extractTextFromHTML(html);
+    }
+    
+    var div = template.content || template;
+    
+    function processNode(node) {
+      if (node.nodeType === 3) {
+        return node.textContent;
+      }
+      if (node.nodeType !== 1) return '';
+      
+      var tagName = node.tagName.toLowerCase();
+      var result = '';
+      
+      switch (tagName) {
+        case 'h1': result = '# ' + processChildren(node) + '\n\n'; break;
+        case 'h2': result = '## ' + processChildren(node) + '\n\n'; break;
+        case 'h3': result = '### ' + processChildren(node) + '\n\n'; break;
+        case 'h4': result = '#### ' + processChildren(node) + '\n\n'; break;
+        case 'h5': result = '##### ' + processChildren(node) + '\n\n'; break;
+        case 'h6': result = '###### ' + processChildren(node) + '\n\n'; break;
+        case 'p': result = processChildren(node) + '\n\n'; break;
+        case 'br': result = '\n'; break;
+        case 'strong': case 'b': result = '**' + processChildren(node) + '**'; break;
+        case 'em': case 'i': result = '*' + processChildren(node) + '*'; break;
+        case 'code': result = '`' + node.textContent + '`'; break;
+        case 'pre': result = '```\n' + node.textContent + '\n```\n\n'; break;
+        case 'blockquote': result = '> ' + processChildren(node).replace(/\n/g, '\n> ') + '\n\n'; break;
+        case 'ul': 
+          result = processList(node, 'ul') + '\n';
+          break;
+        case 'ol': 
+          result = processList(node, 'ol') + '\n';
+          break;
+        case 'a': 
+          var href = node.href || '';
+          var text = processChildren(node);
+          result = '[' + text + '](' + href + ')';
+          break;
+        case 'img': 
+          var alt = node.alt || '';
+          var src = node.src || '';
+          result = '![' + alt + '](' + src + ')';
+          break;
+        case 'div': case 'section': case 'article':
+          result = processChildren(node);
+          break;
+        default:
+          if (node.children.length === 0) {
+            result = node.textContent;
+          } else {
+            result = processChildren(node);
+          }
+      }
+      return result;
+    }
+    
+    function processChildren(node) {
+      var result = '';
+      for (var i = 0; i < node.childNodes.length; i++) {
+        result += processNode(node.childNodes[i]);
+      }
+      return result;
+    }
+    
+    function processList(node, type) {
+      var items = node.querySelectorAll('li');
+      var result = '';
+      items.forEach(function(item, index) {
+        var prefix = type === 'ul' ? '- ' : (index + 1) + '. ';
+        result += prefix + processChildren(item).trim() + '\n';
+      });
+      return result;
+    }
+    
+    return processNode(div).replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  /* Fallback text extraction for strict CSP environments */
+  function extractTextFromHTML(html) {
+    // Simple regex-based extraction when DOM parsing is blocked
+    var text = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\s+|\s+$/g, '');
+    
+    // Basic structure detection
+    var lines = text.split('\n');
+    var result = '';
+    var inParagraph = false;
+    
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      
+      // Detect headings by length and position
+      if (line.length < 100 && i < lines.length / 3 && line.length > 10) {
+        if (inParagraph) result += '\n\n';
+        result += '# ' + line + '\n\n';
+        inParagraph = false;
+      } else {
+        if (!inParagraph) {
+          result += line;
+          inParagraph = true;
+        } else {
+          result += ' ' + line;
+        }
+      }
+    }
+    
+    return result.trim();
+  }
+
+  /* Built-in Markdown renderer */
+  function renderMd(md, container) {
+    container.textContent = '';
+
+    function esc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function inlineFrag(raw) {
+      var frag = document.createDocumentFragment();
+      var patterns = [
+        { re: /!\[([^\]]*)\]\(([^)]+)\)/g, fn: function(m,alt,src) {
+            var img = mk('img'); img.alt=alt; img.src=src; return img; }},
+        { re: /\[([^\]]+)\]\(([^)]+)\)/g, fn: function(m,txt,href) {
+            var a = mk('a'); a.href=href; a.target='_blank'; a.rel='noopener noreferrer';
+            a.textContent=txt; return a; }},
+        { re: /`([^`]+)`/g, fn: function(m,code) {
+            var c = mk('code'); c.textContent=code; return c; }},
+        { re: /\*\*\*(.+?)\*\*\*/g, fn: function(m,t) {
+            var b=mk('strong'),e=mk('em'); e.textContent=t; b.appendChild(e); return b; }},
+        { re: /\*\*(.+?)\*\*/g, fn: function(m,t) {
+            var b=mk('strong'); b.textContent=t; return b; }},
+        { re: /__(.+?)__/g, fn: function(m,t) {
+            var b=mk('strong'); b.textContent=t; return b; }},
+        { re: /\*([^*\n]+?)\*/g, fn: function(m,t) {
+            var e=mk('em'); e.textContent=t; return e; }},
+        { re: /_([^_\n]+?)_/g, fn: function(m,t) {
+            var e=mk('em'); e.textContent=t; return e; }},
+        { re: /~~(.+?)~~/g, fn: function(m,t) {
+            var s=mk('del'); s.textContent=t; return s; }}
+      ];
+
+      var segments = [{text: raw}];
+      patterns.forEach(function(pat) {
+        var next = [];
+        segments.forEach(function(seg) {
+          if (seg.node) { next.push(seg); return; }
+          var s = seg.text, last = 0, m;
+          pat.re.lastIndex = 0;
+          while ((m = pat.re.exec(s)) !== null) {
+            if (m.index > last) next.push({text: s.slice(last, m.index)});
+            next.push({node: pat.fn.apply(null, [m[0]].concat(Array.prototype.slice.call(m,1)))});
+            last = pat.re.lastIndex;
+          }
+          if (last < s.length) next.push({text: s.slice(last)});
+        });
+        segments = next;
+      });
+
+      segments.forEach(function(seg) {
+        frag.appendChild(seg.node || document.createTextNode(seg.text || ''));
+      });
+      return frag;
+    }
+
+    var lines = md.split('\n');
+    var i = 0;
+
+    function flushList(state) {
+      if (state.list) {
+        container.appendChild(state.list);
+        state.list = null;
+        state.listType = null;
+      }
+    }
+
+    function flushBq(state) {
+      if (state.bqLines) {
+        var bq = mk('blockquote');
+        var p = mk('p');
+        ap(p, inlineFrag(state.bqLines.join(' ')));
+        ap(bq, p);
+        container.appendChild(bq);
+        state.bqLines = null;
+      }
+    }
+
+    var state = {list: null, listType: null, bqLines: null};
+
+    while (i < lines.length) {
+      var line = lines[i];
+
+      if (/^```/.test(line)) {
+        flushList(state); flushBq(state);
+        var lang = line.slice(3).trim();
+        var codeLines = [];
+        i++;
+        while (i < lines.length && !/^```/.test(lines[i])) {
+          codeLines.push(lines[i]); i++;
+        }
+        var pre = mk('pre'), code = mk('code');
+        if (lang) code.className = 'language-' + lang;
+        code.textContent = codeLines.join('\n');
+        ap(pre, code); container.appendChild(pre);
+        i++; continue;
+      }
+
+      if (/^    /.test(line)) {
+        flushList(state); flushBq(state);
+        var codeLines2 = [];
+        while (i < lines.length && /^    /.test(lines[i])) {
+          codeLines2.push(lines[i].slice(4)); i++;
+        }
+        var pre2 = mk('pre'), code2 = mk('code');
+        code2.textContent = codeLines2.join('\n');
+        ap(pre2, code2); container.appendChild(pre2);
+        continue;
+      }
+
+      var hm = line.match(/^(#{1,6})\s+(.+)/);
+      if (hm) {
+        flushList(state); flushBq(state);
+        var h = mk('h' + hm[1].length);
+        ap(h, inlineFrag(hm[2].replace(/\s+#+\s*$/, '')));
+        container.appendChild(h);
+        i++; continue;
+      }
+
+      if (i+1 < lines.length) {
+        if (/^=+\s*$/.test(lines[i+1]) && line.trim()) {
+          flushList(state); flushBq(state);
+          var h1 = mk('h1'); ap(h1, inlineFrag(line.trim()));
+          container.appendChild(h1); i+=2; continue;
+        }
+        if (/^-+\s*$/.test(lines[i+1]) && line.trim() && !/^[\-\*\+]\s/.test(line)) {
+          flushList(state); flushBq(state);
+          var h2 = mk('h2'); ap(h2, inlineFrag(line.trim()));
+          container.appendChild(h2); i+=2; continue;
+        }
+      }
+
+      if (/^(\-{3,}|\*{3,}|_{3,})\s*$/.test(line.trim())) {
+        flushList(state); flushBq(state);
+        container.appendChild(mk('hr'));
+        i++; continue;
+      }
+
+      if (/^>\s?/.test(line)) {
+        flushList(state);
+        if (!state.bqLines) state.bqLines = [];
+        state.bqLines.push(line.replace(/^>\s?/, ''));
+        i++; continue;
+      } else { flushBq(state); }
+
+      var ulm = line.match(/^[\-\*\+]\s+(.*)/);
+      if (ulm) {
+        if (state.listType !== 'ul') { flushList(state); state.list = mk('ul'); state.listType = 'ul'; }
+        var li = mk('li'); ap(li, inlineFrag(ulm[1]));
+        state.list.appendChild(li);
+        i++; continue;
+      }
+
+      var olm = line.match(/^\d+\.\s+(.*)/);
+      if (olm) {
+        if (state.listType !== 'ol') { flushList(state); state.list = mk('ol'); state.listType = 'ol'; }
+        var li2 = mk('li'); ap(li2, inlineFrag(olm[1]));
+        state.list.appendChild(li2);
+        i++; continue;
+      }
+
+      flushList(state);
+
+      if (/\|/.test(line) && i+1 < lines.length && /^\|?[\s\-:]+\|/.test(lines[i+1])) {
+        var table = mk('table'), thead = mk('thead'), tbody = mk('tbody');
+        var hdrCells = line.split('|').map(function(c){return c.trim();}).filter(Boolean);
+        var tr = mk('tr');
+        hdrCells.forEach(function(c) { var th=mk('th'); ap(th,inlineFrag(c)); tr.appendChild(th); });
+        thead.appendChild(tr); i+=2;
+        while (i < lines.length && /\|/.test(lines[i])) {
+          var cells = lines[i].split('|').map(function(c){return c.trim();}).filter(Boolean);
+          var row = mk('tr');
+          cells.forEach(function(c) { var td=mk('td'); ap(td,inlineFrag(c)); row.appendChild(td); });
+          tbody.appendChild(row); i++;
+        }
+        ap(table, thead, tbody); container.appendChild(table);
+        continue;
+      }
+
+      if (!line.trim()) { i++; continue; }
+
+      var paraLines = [];
+      while (i < lines.length && lines[i].trim() &&
+             !/^#{1,6}\s/.test(lines[i]) && !/^```/.test(lines[i]) &&
+             !/^[\-\*\+]\s/.test(lines[i]) && !/^\d+\.\s/.test(lines[i]) &&
+             !/^>\s/.test(lines[i]) && !/^(\-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i].trim())) {
+        paraLines.push(lines[i]); i++;
+      }
+      if (paraLines.length) {
+        var p = mk('p');
+        ap(p, inlineFrag(paraLines.join(' ')));
+        container.appendChild(p);
+      }
+    }
+    flushList(state);
+    flushBq(state);
+  }
+
+  /* CSS styles */
+  var styleEl = mk('style');
+  styleEl.textContent =
+    '#__universal_reader__{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;flex-direction:column!important;background:#faf9f7;transition:background .25s}' +
+    '#__universal_reader__.dk{background:#1c1c1e!important}' +
+    '#__universal_reader__ *{box-sizing:border-box!important;max-width:100%}' +
+    '#__universal_reader__ .bar{display:flex!important;align-items:center;gap:5px;padding:8px 14px;background:#fff;border-bottom:1px solid #e5e5e5;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.07)}' +
+    '#__universal_reader__.dk .bar{background:#2c2c2e!important;border-color:#3a3a3c!important}' +
+    '#__universal_reader__ .bar button{padding:5px 10px;border-radius:6px;border:1px solid #d5d5d5;background:#fafafa;cursor:pointer;font-size:12px;font-family:-apple-system,system-ui,sans-serif;color:#333;white-space:nowrap;line-height:1.35;transition:background .1s;outline:none}' +
+    '#__universal_reader__ .bar button:hover{background:#efefef}' +
+    '#__universal_reader__.dk .bar button{background:#3a3a3c!important;border-color:#48484a!important;color:#ddd!important}' +
+    '#__universal_reader__.dk .bar button:hover{background:#48484a!important}' +
+    '#__universal_reader__ .cp{background:#007aff!important;border-color:#007aff!important;color:#fff!important;font-weight:600}' +
+    '#__universal_reader__ .cp:hover{background:#0062cc!important}' +
+    '#__universal_reader__ .sc{flex:1;overflow-y:auto;padding:48px 20px}' +
+    '#__universal_reader__ .in{max-width:700px;margin:0 auto;font-size:18px;line-height:1.82;color:#1a1a1a;font-family:Georgia,"Times New Roman",serif;word-wrap:break-word}' +
+    '#__universal_reader__.dk .in{color:#e0ddd8!important}' +
+    '#__universal_reader__ .in h1{font-size:1.85em!important;font-weight:700!important;margin:0 0 .5em!important;line-height:1.28!important;font-family:-apple-system,system-ui,sans-serif!important}' +
+    '#__universal_reader__ .in h2{font-size:1.38em!important;font-weight:600!important;margin:1.5em 0 .45em!important;border-bottom:1px solid #ebebeb!important;padding-bottom:.3em!important;font-family:-apple-system,system-ui,sans-serif!important}' +
+    '#__universal_reader__.dk .in h2{border-color:#3a3a3c!important}' +
+    '#__universal_reader__ .in h3{font-size:1.12em!important;font-weight:600!important;margin:1.2em 0 .4em!important;font-family:-apple-system,system-ui,sans-serif!important}' +
+    '#__universal_reader__ .in h4,#__universal_reader__ .in h5,#__universal_reader__ .in h6{font-size:1em!important;font-weight:600!important;margin:1em 0 .3em!important;font-family:-apple-system,system-ui,sans-serif!important}' +
+    '#__universal_reader__ .in p{margin:.78em 0!important}' +
+    '#__universal_reader__ .in a{color:#007aff!important;text-decoration:none!important}' +
+    '#__universal_reader__ .in a:hover{text-decoration:underline!important}' +
+    '#__universal_reader__ .in strong{font-weight:700!important}' +
+    '#__universal_reader__ .in em{font-style:italic!important}' +
+    '#__universal_reader__ .in del{text-decoration:line-through!important;opacity:.7}' +
+    '#__universal_reader__ .in code{background:#f0f0f0!important;padding:2px 5px!important;border-radius:4px!important;font-size:.87em!important;font-family:"SF Mono","Fira Code",Menlo,monospace!important}' +
+    '#__universal_reader__.dk .in code{background:#2c2c2e!important}' +
+    '#__universal_reader__ .in pre{background:#f4f4f4!important;padding:16px!important;border-radius:8px!important;overflow-x:auto!important;margin:1em 0!important}' +
+    '#__universal_reader__.dk .in pre{background:#242426!important}' +
+    '#__universal_reader__ .in pre code{background:none!important;padding:0!important;font-size:.9em!important}' +
+    '#__universal_reader__ .in blockquote{margin:1em 0!important;padding:.5em 1.1em!important;border-left:3px solid #007aff!important;background:#f0f6ff!important;border-radius:0 6px 6px 0!important;font-style:italic!important}' +
+    '#__universal_reader__.dk .in blockquote{background:#192a3a!important}' +
+    '#__universal_reader__ .in img{border-radius:6px!important;margin:.4em 0!important;height:auto!important;display:block!important}' +
+    '#__universal_reader__ .in ul,#__universal_reader__ .in ol{margin:.6em 0!important;padding-left:1.6em!important}' +
+    '#__universal_reader__ .in li{margin:.28em 0!important}' +
+    '#__universal_reader__ .in table{border-collapse:collapse!important;margin:1em 0!important;font-size:.9em!important;width:100%!important}' +
+    '#__universal_reader__ .in th,#__universal_reader__ .in td{padding:7px 11px!important;border:1px solid #ddd!important;text-align:left!important;vertical-align:top!important}' +
+    '#__universal_reader__.dk .in th,#__universal_reader__.dk .in td{border-color:#3a3a3c!important}' +
+    '#__universal_reader__ .in th{background:#f5f5f5!important;font-weight:600!important}' +
+    '#__universal_reader__.dk .in th{background:#2c2c2e!important}' +
+    '#__universal_reader__ .in hr{border:none!important;border-top:1px solid #eee!important;margin:1.8em 0!important}' +
+    '#__universal_reader__.dk .in hr{border-color:#333!important}' +
+    '#__universal_reader__ .msg{text-align:center!important;padding:60px 20px!important;color:#999!important;font-size:15px!important;font-family:system-ui,sans-serif!important;line-height:1.7!important}' +
+    '#__universal_reader__ .method{font-size:11px;color:#999;font-family:system-ui;margin-top:4px}' +
+    '@keyframes __urpulse{0%,100%{opacity:.35}50%{opacity:.9}}' +
+    '#__universal_reader__ .pulse{animation:__urpulse 1.5s ease-in-out infinite}';
+
+  /* Build UI */
+  var bar = mk('div'); bar.className = 'bar';
+  var bX  = mk('button'); bX.id  = '__ur_x';  bX.textContent  = 'Close';
+  var bCp = mk('button'); bCp.id = '__ur_cp'; bCp.className = 'cp'; bCp.textContent = 'Copy Markdown';
+  var bTr = mk('button'); bTr.id = '__ur_tr'; bTr.textContent = '🌐 中文'; bTr.title = 'Translate to Chinese with Gemini';
+  var bDk = mk('button'); bDk.id = '__ur_dk'; bDk.textContent = 'Dark';
+  var bAp = mk('button'); bAp.id = '__ur_ap'; bAp.textContent = 'A+';  bAp.title = 'Increase font';
+  var bAm = mk('button'); bAm.id = '__ur_am'; bAm.textContent = 'A-'; bAm.title = 'Decrease font';
+  var sp  = mk('span');   sp.style.cssText = 'flex:1';
+  var method = mk('span');  method.className = 'method';
+  ap(bar, bX, bCp, bTr, bDk, bAp, bAm, sp, method);
+
+  var sc    = mk('div'); sc.className = 'sc';
+  var inner = mk('div'); inner.className = 'in';
+  var msg   = mk('p');   msg.className = 'msg pulse'; msg.textContent = 'Extracting content...';
+  ap(inner, msg); ap(sc, inner);
+
+  var el = mk('div'); el.id = ID;
+  ap(el, styleEl, bar, sc);
+  document.body.appendChild(el);
+
+  /* Event handlers */
+  bX.onclick = function() { el.remove(); };
+
+  bCp.onclick = function() {
+    if (!raw) return;
+    var btn = this;
+    function done() { btn.textContent='Copied!'; setTimeout(function(){btn.textContent='Copy Markdown';},2200); }
+    function fb() {
+      var ta=mk('textarea'); ta.value=raw; ta.style.cssText='position:fixed;top:-9999px;opacity:0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done();
+    }
+    (navigator.clipboard && navigator.clipboard.writeText)
+      ? navigator.clipboard.writeText(raw).then(done).catch(fb) : fb();
+  };
+
+// Improved Gemini translation implementation
+bTr.onclick = function() {
+  if (!raw) return;
+  var btn = this;
+  btn.textContent = '翻译中...';
+  btn.disabled = true;
+  
+  // Create translation prompt
+  var prompt = 'Please translate the following English text to Chinese. Provide a high-quality, accurate translation that:\n\n1. Maintains original meaning and context\n2. Uses natural, fluent Chinese expression\n3. Preserves technical terms and proper nouns appropriately\n4. Follows Chinese cultural and linguistic conventions\n5. Ensures factual accuracy and domain-specific terminology\n\nText to translate:\n\n' + raw;
+  
+  // Method 1: Copy to clipboard first (most reliable)
+  function copyToClipboard() {
+    try {
+      // Modern clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(prompt).then(function() {
+          return true;
+        }).catch(function() {
+          return false;
+        });
+      }
+      
+      // Fallback: execCommand
+      var ta = mk('textarea');
+      ta.value = prompt;
+      ta.style.cssText = 'position:fixed;top:-9999px;opacity:0;left:0;width:1px;height:1px';
+      document.body.appendChild(ta);
+      ta.select();
+      var success = document.execCommand('copy');
+      ta.remove();
+      return success;
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  // Try to copy to clipboard
+  var copied = copyToClipboard();
+  
+  if (copied) {
+    // Show success message
+    var successMsg = mk('div');
+    successMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#4CAF50;color:white;padding:15px 20px;border-radius:8px;z-index:999999;font-family:system-ui,sans-serif;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+    successMsg.textContent = '✅ 翻译内容已复制到剪贴板！请在Gemini中粘贴使用。';
+    document.body.appendChild(successMsg);
+    
+    // Open Gemini in new tab
+    window.open('https://gemini.google.com/', '_blank');
+    
+    // Remove message after 3 seconds
+    setTimeout(function() {
+      if (successMsg.parentNode) {
+        successMsg.parentNode.removeChild(successMsg);
+      }
+    }, 3000);
+    
+  } else {
+    // Fallback: show prompt in modal for manual copy
+    var modal = mk('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:flex;align-items:center;justify-content:center;';
+    
+    var content = mk('div');
+    content.style.cssText = 'background:white;padding:20px;border-radius:12px;max-width:600px;max-height:80vh;overflow-y:auto;font-family:system-ui,sans-serif;';
+    
+    var title = mk('h3');
+    title.textContent = '翻译提示内容';
+    title.style.cssText = 'margin:0 0 15px 0;color:#333;';
+    
+    var promptArea = mk('textarea');
+    promptArea.value = prompt;
+    promptArea.style.cssText = 'width:100%;height:300px;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:monospace;font-size:12px;resize:vertical;';
+    
+    var buttonArea = mk('div');
+    buttonArea.style.cssText = 'margin-top:15px;text-align:right;';
+    
+    var copyBtn = mk('button');
+    copyBtn.textContent = '复制内容';
+    copyBtn.style.cssText = 'background:#007AFF;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-right:10px;';
+    copyBtn.onclick = function() {
+      promptArea.select();
+      document.execCommand('copy');
+      copyBtn.textContent = '已复制！';
+      setTimeout(function() {
+        copyBtn.textContent = '复制内容';
+      }, 2000);
+    };
+    
+    var openBtn = mk('button');
+    openBtn.textContent = '打开Gemini';
+    openBtn.style.cssText = 'background:#34A853;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;';
+    openBtn.onclick = function() {
+      window.open('https://gemini.google.com/', '_blank');
+    };
+    
+    var closeBtn = mk('button');
+    closeBtn.textContent = '关闭';
+    closeBtn.style.cssText = 'background:#666;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-left:10px;';
+    closeBtn.onclick = function() {
+      document.body.removeChild(modal);
+    };
+    
+    buttonArea.appendChild(copyBtn);
+    buttonArea.appendChild(openBtn);
+    buttonArea.appendChild(closeBtn);
+    
+    content.appendChild(title);
+    content.appendChild(promptArea);
+    content.appendChild(buttonArea);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // Close on background click
+    modal.onclick = function(e) {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    };
+  }
+  
+  // Reset button
+  setTimeout(function() {
+    btn.textContent = '🌐 中文';
+    btn.disabled = false;
+  }, 2000);
+};
+                input.dispatchEvent(new KeyboardEvent('keydown', enterEvent));
+                setTimeout(function() {
+                  input.dispatchEvent(new KeyboardEvent('keypress', enterEvent));
+                  setTimeout(function() {
+                    input.dispatchEvent(new KeyboardEvent('keyup', enterEvent));
+                  }, 80);
+                }, 80);
+              }
+            }, 500);
+          }
+          
+          // Timeout after 10 seconds
+          setTimeout(function() {
+            clearInterval(checkInterval);
+          }, 10000);
+          
+        } catch (e) {
+          // Cross-origin restrictions - fallback to URL method
+          clearInterval(checkInterval);
+          var encodedPrompt = encodeURIComponent(prompt);
+          var fallbackUrl = 'https://gemini.google.com/?q=' + encodedPrompt;
+          window.open(fallbackUrl, '_blank');
+        }
+      }, 100);
+    } else {
+      // Popup blocked - fallback to URL method
+      var encodedPrompt = encodeURIComponent(prompt);
+      var fallbackUrl = 'https://gemini.google.com/?q=' + encodedPrompt;
+      window.open(fallbackUrl, '_blank');
+    }
+    
+    // Reset button
+    setTimeout(function() {
+      btn.textContent = '🌐 中文';
+      btn.disabled = false;
+    }, 2000);
+  };
+
+  bDk.onclick = function() {
+    el.classList.toggle('dk');
+    this.textContent = el.classList.contains('dk') ? 'Light' : 'Dark';
+  };
+
+  bAp.onclick = function() { sz=Math.min(sz+2,26); inner.style.fontSize=sz+'px'; };
+  bAm.onclick = function() { sz=Math.max(sz-2,14); inner.style.fontSize=sz+'px'; };
+
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key==='Escape' && document.getElementById('__universal_reader__')) {
+      el.remove(); document.removeEventListener('keydown', esc);
+    }
+  });
+
+  /* Try local extraction first */
+  function tryLocalExtraction() {
+    try {
+      var content = extractContent();
+      if (content && content.length > 100) {
+        raw = content;
+        method.textContent = 'Method: ' + currentMethod;
+        var target = document.querySelector('#__universal_reader__ .in');
+        if (target) {
+          target.textContent = '';
+          renderMd(content, target);
+          target.style.fontSize = sz + 'px';
+          document.querySelector('#__universal_reader__ .sc').scrollTop = 0;
+        }
+        return true;
+      }
+    } catch (e) {
+      console.log('Local extraction failed:', e);
+    }
+    return false;
+  }
+
+  /* Fallback to Jina API */
+  function tryJinaAPI() {
+    method.textContent = 'Method: Jina API (fallback)';
+    fetch('https://r.jina.ai/' + location.href, {
+      headers: { 'X-Return-Format': 'markdown', 'X-Timeout': '30', 'Accept': 'text/plain' },
+      mode: 'cors'
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function(text) {
+      raw = text;
+      var target = document.querySelector('#__universal_reader__ .in');
+      if (target) {
+        target.textContent = '';
+        renderMd(text, target);
+        target.style.fontSize = sz + 'px';
+        document.querySelector('#__universal_reader__ .sc').scrollTop = 0;
+      }
+    })
+    .catch(function(e) {
+      var target = document.querySelector('#__universal_reader__ .in');
+      if (target) {
+        target.textContent = '';
+        var p1=mk('p'); p1.className='msg'; p1.textContent='Content extraction failed';
+        var p2=mk('p'); p2.style.cssText='text-align:center;font-size:13px;color:#bbb;font-family:system-ui;margin-top:6px';
+        p2.textContent='Try on a different page or check network connection';
+        ap(target, p1, p2);
+      }
+    });
+  }
+
+  /* Start extraction */
+  if (!tryLocalExtraction()) {
+    tryJinaAPI();
+  }
+}
+
+/* Generate bookmarklet code */
+var src = '(' + universalReader.toString() + ')()';
+var href = 'javascript:' + encodeURIComponent(src);
+document.getElementById('bml').href = href;
+document.getElementById('src-pre').textContent = src;
+document.getElementById('copy-src').onclick = function() {
+  var btn = this;
+  navigator.clipboard.writeText(href).then(function() {
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = 'Copy Source Code'; }, 2200);
+  });
+};
+</script>
+</body>
+</html>
