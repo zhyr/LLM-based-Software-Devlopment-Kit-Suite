@@ -1,3 +1,11 @@
+"""
+离线文本清洗（写盘 *_cleaned.txt）— Kit-Suite 遗留脚本。
+
+内存注入路径请用 coding-scaffold：
+  tools/llint/doc_noise.py（Compose Input / llint 流水线，不改源仓）
+
+本文件保留根目录独立用法，行为不变。
+"""
 import os
 import re
 import json

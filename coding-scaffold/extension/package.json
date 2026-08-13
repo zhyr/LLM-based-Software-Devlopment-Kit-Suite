@@ -2,7 +2,7 @@
   "name": "haxitag-coding-scaffold",
   "displayName": "HaxiTAG Coding Scaffold",
   "description": "私有仓 AI Coding Compose 生成高质量 prompt+context；对接 Forge / Sentinel。适用于 VS Code、Cursor、CodeBuddy。",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "publisher": "haxitag",
   "icon": "media/icon.png",
   "homepage": "https://haxitag.com/community/forge",

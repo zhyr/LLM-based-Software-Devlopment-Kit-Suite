@@ -1,6 +1,6 @@
 {
   "name": "@haxitag/coding-scaffold",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "private": true,
   "description": "HaxiTAG coding scaffold: compose prompt+context for private repos (VS Code/Cursor/CodeBuddy/Forge)",
   "repository": {

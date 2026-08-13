@@ -13,7 +13,7 @@ LLM 辅助软件开发工具集合（HaxiTAG）。
 |----|------|
 | 定位 | 私有仓与 AI Coding 的对接插件（非编码 Agent 本体） |
 | 主能力 | Compose Input：隐私清洗 → llint → 命名对齐 → 线性编排 → prompt；可选 Sentinel |
-| 安装包 | [`coding-scaffold/dist/haxitag-coding-scaffold-0.5.2.vsix`](coding-scaffold/dist/haxitag-coding-scaffold-0.5.2.vsix)（版本以 `extension/package.json` 为准） |
+| 安装包 | [`coding-scaffold/dist/haxitag-coding-scaffold-0.5.3.vsix`](coding-scaffold/dist/haxitag-coding-scaffold-0.5.3.vsix)（版本以 `extension/package.json` 为准） |
 | 说明 | [`coding-scaffold/README.md`](coding-scaffold/README.md) · 扩展详情 [`extension/README.md`](coding-scaffold/extension/README.md) |
 | 官网 | [https://haxitag.com/community/forge](https://haxitag.com/community/forge) |
 
@@ -21,7 +21,7 @@ LLM 辅助软件开发工具集合（HaxiTAG）。
 
 ```bash
 # 1) 安装扩展
-cursor --install-extension coding-scaffold/dist/haxitag-coding-scaffold-0.5.2.vsix
+cursor --install-extension coding-scaffold/dist/haxitag-coding-scaffold-0.5.3.vsix
 
 # 2) 写入策略模板到私有仓
 cd coding-scaffold
@@ -46,7 +46,7 @@ cd coding-scaffold/extension && npm install && npm run package:vsix
 
 → **[`coding-scaffold/docs/05-kit-suite-integration.md`](coding-scaffold/docs/05-kit-suite-integration.md)**
 
-结论摘要：`clean-data` 类文档噪声清洗适合并入 compose 流水线；爬虫 / 书签阅读器 / 磁盘与 git 清理保持独立；根目录 `file_merger` / `structure-Explorer` 已与 `coding-scaffold/tools/legacy/` 重复。
+结论摘要：`clean-data` 已并入 `tools/llint/doc_noise.py`；爬虫 / 书签阅读器 / 磁盘与 git 清理保持独立；根目录 `file_merger` / `structure-Explorer` **保持现状**（与 legacy 并存）。
 
 ---
 
@@ -55,8 +55,8 @@ cd coding-scaffold/extension && npm install && npm run package:vsix
 | 工具 | 用途 | 与 Scaffold |
 |------|------|-------------|
 | `data-for-llm-crawl.py` + `crawler_config.json` | 文档站爬取 → markdown | 可选旁路 ingest，不进扩展核心 |
-| `clean-data.py` | 清洗爬虫产物噪声 | **建议**模块化进 llint/文档清洗 |
-| `file_merger.py` / `project-structure-Explorer.py` | 合并全文 / 目录树 | 已迁 legacy，勿再当主路径 |
+| `clean-data.py` | 清洗爬虫产物噪声 | **已模块化**进 `coding-scaffold/tools/llint/doc_noise.py`（根脚本仍可离线写盘） |
+| `file_merger.py` / `project-structure-Explorer.py` | 合并全文 / 目录树 | **保持现状**（根目录与 `tools/legacy/` 并存） |
 | `universal-reader-*.html` | 网页 → markdown（浏览器） | 保持独立 |
 | `js/vendor/` | showdown / mermaid / katex 等 | 半成品预览栈；Playground 见 Scaffold |
 | `git-tidy.sh` / `disk_maintenance.sh` | 仓库 gc / 开发机清理 | 运维，不进 vsix |

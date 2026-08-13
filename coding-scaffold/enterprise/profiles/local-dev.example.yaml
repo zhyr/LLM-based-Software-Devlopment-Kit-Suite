@@ -90,9 +90,10 @@ maxFileBytes: 524288
 maxTotalBytes: 8388608
 allowBinary: false
 
-# 输入法（compose-input）开关 — 薄层，默认开清洗类，Sentinel 默认关（可 --sentinel）
+# Compose-input 开关 — 薄层；Sentinel 默认关（可用 --sentinel）
 ime:
   llint: true
+  docNoise: true   # Kit-Suite clean-data 文档噪声（内存，不写源）
   linear: true
   align: true
   enhance: true
@@ -113,5 +114,6 @@ sentinel:
 
 notes: >
   主入口：tools/inject/compose_input.py（prompt+context）。
+  llint 含文档噪声清洗（对齐根目录 clean-data.py 策略，默认不写盘）。
   validate / privacy scan 仍不改写 --root。
   Sentinel 默认走本地轻量预检；配置 sentinel.command / SENTINEL_CMD 可接完整 Sentinel。

@@ -10,7 +10,7 @@
 
 | 能力 | 说明 |
 |------|------|
-| **Compose Input** | 一键整合：隐私清洗 → llint → 命名对齐 → 线性编排 → prompt 壳 |
+| **Compose Input** | 一键整合：隐私清洗 → llint（含文档噪声）→ 命名对齐 → 线性编排 → prompt 壳 |
 | **动态注入** | 选定文件内存脱敏/去噪后注入上下文，不写回源文件 |
 | **命名对齐** | 按 `.haxitag/naming-align.yaml` 统一参数/变量名 |
 | **Sentinel 桥** | 可选安全/供应链预检附注（对接自有 Sentinel） |
@@ -28,12 +28,12 @@
 
 在仓库中找到打包产物（见下方「打包」），例如：
 
-`coding-scaffold/dist/haxitag-coding-scaffold-0.5.2.vsix`
+`coding-scaffold/dist/haxitag-coding-scaffold-0.5.3.vsix`
 
 **Cursor**
 
 ```bash
-cursor --install-extension /绝对路径/coding-scaffold/dist/haxitag-coding-scaffold-0.5.2.vsix
+cursor --install-extension /绝对路径/coding-scaffold/dist/haxitag-coding-scaffold-0.5.3.vsix
 ```
 
 或：Cursor → Extensions → `⋯` → **Install from VSIX…** → 选择该文件 → **Reload**。
@@ -41,7 +41,7 @@ cursor --install-extension /绝对路径/coding-scaffold/dist/haxitag-coding-sca
 **VS Code / CodeBuddy**
 
 ```bash
-code --install-extension /绝对路径/coding-scaffold/dist/haxitag-coding-scaffold-0.5.2.vsix
+code --install-extension /绝对路径/coding-scaffold/dist/haxitag-coding-scaffold-0.5.3.vsix
 ```
 
 或在对应 IDE 的扩展面板选择 **Install from VSIX…**。

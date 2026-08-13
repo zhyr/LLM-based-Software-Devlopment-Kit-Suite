@@ -93,10 +93,28 @@
     },
     "ime": {
       "type": "object",
-      "description": "Compose-input (输入法) feature toggles",
+      "description": "Compose-input feature toggles",
       "additionalProperties": false,
       "properties": {
         "llint": { "type": "boolean", "default": true },
+        "docNoise": {
+          "type": "boolean",
+          "default": true,
+          "description": "Strip crawler/export footers (Kit-Suite clean-data strategies) during llint"
+        },
+        "docNoiseStrategies": {
+          "type": "array",
+          "description": "Optional override list of {name, pattern, replacement}",
+          "items": {
+            "type": "object",
+            "required": ["pattern"],
+            "properties": {
+              "name": { "type": "string" },
+              "pattern": { "type": "string" },
+              "replacement": { "type": "string" }
+            }
+          }
+        },
         "linear": { "type": "boolean", "default": true },
         "align": { "type": "boolean", "default": true },
         "enhance": { "type": "boolean", "default": true },

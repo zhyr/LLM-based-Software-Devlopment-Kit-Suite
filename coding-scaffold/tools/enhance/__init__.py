@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 DEFAULT_SYSTEM = (
     "你是企业私有仓上的编码助手。以下 context 已经过 HaxiTAG coding-scaffold "
-    "输入法整合（隐私清洗 / llint / 命名对齐等），私有仓源文件未被改写。"
+    "Compose 整合（隐私清洗 / llint / 文档噪声 / 命名对齐等），私有仓源文件未被改写。"
     "请仅基于提供的 context 作答；不要索要 .env 或密钥；改动保持最小必要。"
 )
 

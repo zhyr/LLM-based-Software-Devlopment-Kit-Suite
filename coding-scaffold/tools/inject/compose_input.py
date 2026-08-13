@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
 """
-Compose Input — coding-scaffold「输入法」主入口.
+Compose Input — coding-scaffold 主入口（输入前整合 prompt + context）。
 
-私有仓 READ-ONLY → privacy → llint → align → linear → enhance prompt
-→ optional Sentinel bridge → 高质量 prompt + context pack（供 Forge / IDE Agent）.
-
-Usage:
-  python3 tools/inject/compose_input.py \\
-    --root /path/to/private-repo \\
-    --policy .../.haxitag/workspace-policy.yaml \\
-    --files src/a.ts \\
-    --task "修复登录校验" \\
-    --format markdown \\
-    --sentinel
+私有仓 READ-ONLY → privacy → llint(+doc noise) → align → linear → enhance
+→ optional Sentinel bridge → pack for Forge / IDE Agent.
 """
 
 from __future__ import annotations
@@ -32,6 +23,7 @@ from enhance import build_prompt
 from inject.paths import read_path_list
 from inject.resolve_context import resolve_one
 from llint import linearize_blocks, llint_text
+from llint.doc_noise import strategies_from_policy
 from policy.common import load_policy
 from privacy.pipeline import normalize_methods, privacy_config_from_policy
 from sentinel import run_sentinel
@@ -47,6 +39,10 @@ def _ime_flags(policy: dict, args: argparse.Namespace) -> Dict[str, bool]:
         ime = {}
     return {
         "llint": _flag(args.llint, bool(ime.get("llint", True))),
+        "docNoise": _flag(
+            getattr(args, "doc_noise", None),
+            bool(ime.get("docNoise", True)),
+        ),
         "linear": _flag(args.linear, bool(ime.get("linear", True))),
         "align": _flag(args.align, bool(ime.get("align", True))),
         "enhance": _flag(args.enhance, bool(ime.get("enhance", True))),
@@ -74,6 +70,7 @@ def compose(
         override = load_align_map(align_map_override)
         align_cfg["map"] = {**align_cfg.get("map", {}), **override}
         align_cfg["enabled"] = bool(align_cfg["map"])
+    doc_strategies = strategies_from_policy(policy)
 
     for b in blocks:
         if b.get("status") != "ok" or not b.get("content"):
@@ -81,10 +78,16 @@ def compose(
         content = b["content"]
         methods = list(b.get("methods") or [])
         if flags["llint"]:
-            content, rules = llint_text(content)
+            content, rules = llint_text(
+                content,
+                doc_noise=bool(flags.get("docNoise", True)),
+                doc_noise_strategies=doc_strategies,
+            )
             methods.extend(rules)
             if "llint" not in pipeline:
                 pipeline.append("llint")
+            if any(r.startswith("doc_noise:") for r in rules) and "doc_noise" not in pipeline:
+                pipeline.append("doc_noise")
         if flags["align"] and align_cfg.get("enabled"):
             content, rules = align_text(content, align_cfg["map"])
             methods.extend(rules)
@@ -203,9 +206,18 @@ def main() -> int:
     parser.add_argument("--methods", nargs="*", default=None)
     parser.add_argument("--align-map", default="", help="Override naming align map")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
-    parser.set_defaults(llint=None, linear=None, align=None, enhance=None, sentinel=None)
+    parser.set_defaults(
+        llint=None,
+        doc_noise=None,
+        linear=None,
+        align=None,
+        enhance=None,
+        sentinel=None,
+    )
     parser.add_argument("--llint", action="store_true", dest="llint")
     parser.add_argument("--no-llint", action="store_false", dest="llint")
+    parser.add_argument("--doc-noise", action="store_true", dest="doc_noise")
+    parser.add_argument("--no-doc-noise", action="store_false", dest="doc_noise")
     parser.add_argument("--linear", action="store_true", dest="linear")
     parser.add_argument("--no-linear", action="store_false", dest="linear")
     parser.add_argument("--align", action="store_true", dest="align")
