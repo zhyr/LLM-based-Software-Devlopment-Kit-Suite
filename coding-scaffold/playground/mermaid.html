@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HaxiTAG Coding Scaffold — Mermaid Playground</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    const src = document.getElementById('src');
+    const out = document.getElementById('out');
+    let seq = 0;
+    async function render() {
+      const code = (src.value || '').trim() || 'flowchart LR\n  A[Empty]';
+      seq += 1;
+      const id = 'mmd-' + seq;
+      try {
+        const { svg } = await mermaid.render(id, code);
+        out.innerHTML = svg;
+      } catch (e) {
+        out.innerHTML = '<pre style="color:#f88">' + String(e.message || e) + '</pre>';
+      }
+    }
+    src.addEventListener('input', () => { clearTimeout(window.__t); window.__t = setTimeout(render, 280); });
+    render();
+  </script>
+  <style>
+    :root { color-scheme: dark; --bg: #0f1419; --panel: #1a2332; --fg: #e7ecf3; --muted: #8b9bb4; --acc: #3d8bfd; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+    header { padding: 12px 16px; border-bottom: 1px solid #2a3548; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+    header a { color: var(--acc); text-decoration: none; }
+    header .muted { color: var(--muted); font-size: 12px; }
+    main { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 52px); }
+    textarea { background: var(--panel); color: var(--fg); font: 13px/1.45 ui-monospace, monospace; padding: 16px; border: 0; border-right: 1px solid #2a3548; resize: none; outline: none; min-height: 100%; }
+    #out { padding: 16px; overflow: auto; background: #121820; display: flex; align-items: flex-start; justify-content: center; }
+    #out svg { max-width: 100%; height: auto; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } textarea { border-right: 0; border-bottom: 1px solid #2a3548; min-height: 40vh; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mermaid Playground</h1>
+    <span class="muted">HaxiTAG Coding Scaffold · 架构 / 流程草图</span>
+    <a href="markdown.html">← Markdown</a>
+    <a href="https://haxitag.com/community/forge" target="_blank" rel="noopener">Forge</a>
+  </header>
+  <main>
+    <textarea id="src" spellcheck="false">flowchart LR
+  Repo[Private repo] -->|read-only| Compose[Compose Input]
+  Compose --> Pack[prompt + context]
+  Pack --> IDE[VS Code / Cursor / CodeBuddy]
+  Pack --> Forge[Forge]
+  Compose -.->|optional| Sentinel[Sentinel]</textarea>
+    <div id="out"></div>
+  </main>
+</body>
+</html>

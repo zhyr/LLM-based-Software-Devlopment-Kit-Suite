@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haxitag.com/schemas/coding-scaffold/workspace-policy.json",
+  "title": "HaxiTAG Workspace Policy",
+  "type": "object",
+  "required": ["name", "version", "include", "exclude"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "description": { "type": "string" },
+    "include": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "exclude": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "denyNames": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Exact or glob file basenames that must never enter Agent context"
+    },
+    "secretPatterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Regex patterns scanned against file content (also used by privacy.redact)"
+    },
+    "maxFileBytes": { "type": "integer", "minimum": 1 },
+    "maxTotalBytes": { "type": "integer", "minimum": 1 },
+    "allowBinary": { "type": "boolean", "default": false },
+    "privacy": {
+      "type": "object",
+      "description": "Aligned with KnowledgeBase preprocessMethods: 清洗 / 去噪 / 脱敏",
+      "additionalProperties": false,
+      "properties": {
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "clean",
+              "denoise",
+              "redact",
+              "清洗",
+              "数据清洗",
+              "去噪",
+              "去噪处理",
+              "脱敏",
+              "脱敏、去隐私化",
+              "去隐私化"
+            ]
+          },
+          "description": "Ordered pipeline like KnowledgeBase preprocessMethods"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["inject", "report"],
+          "default": "inject",
+          "description": "inject = in-memory clean/denoise/redact into Agent context (never write private source); report = scan-only findings"
+        },
+        "sensitiveKeys": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Substring match on JSON/YAML keys (logger.ts SENSITIVE_KEYS)"
+        },
+        "piiFieldKeys": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Exact field keys to mask (preprocess.ts: email/phone/id)"
+        },
+        "piiPatterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "secretPatterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "noiseGlobs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Denoise skip globs (lockfiles, minified, snapshots)"
+        },
+        "stripComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Best-effort comment stripping when denoise runs"
+        }
+      }
+    },
+    "ime": {
+      "type": "object",
+      "description": "Compose-input (输入法) feature toggles",
+      "additionalProperties": false,
+      "properties": {
+        "llint": { "type": "boolean", "default": true },
+        "linear": { "type": "boolean", "default": true },
+        "align": { "type": "boolean", "default": true },
+        "enhance": { "type": "boolean", "default": true },
+        "sentinel": { "type": "boolean", "default": false },
+        "rules": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "align": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "mapFile": { "type": "string" },
+        "map": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "sentinel": {
+      "type": "object",
+      "description": "Bridge to external Sentinel (CLI/HTTP) or local precheck",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "command": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

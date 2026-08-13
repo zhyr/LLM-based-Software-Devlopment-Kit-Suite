@@ -1,0 +1,14 @@
+---
+description: Enterprise private-repo safety for local coding agents
+globs:
+alwaysApply: true
+---
+
+# Private repository safety
+
+- Treat this workspace as **confidential enterprise source**.
+- Never instruct the user to paste secrets, `.env`, private keys, or customer data into public chats.
+- Prefer reading only files needed for the current task.
+- If a path matches deny patterns (`.env`, `*.pem`, credentials), refuse to open/export it and explain why.
+- Do not run destructive git commands (`push --force`, hard reset to shared branches) unless the user explicitly asks.
+- When unsure whether a file is safe for context, ask before reading.

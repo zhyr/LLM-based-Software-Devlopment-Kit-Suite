@@ -2,8 +2,25 @@
 
 # dependencies
 /node_modules
+**/node_modules/
 /.pnp
 .pnp.js
+
+# coding-scaffold extension build
+coding-scaffold/extension/out/
+coding-scaffold/extension/resources/
+coding-scaffold/extension/*.vsix
+!coding-scaffold/dist/*.vsix
+
+# python
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+
+# example bootstrap artifacts (regenerate via bootstrap_workspace.py)
+coding-scaffold/examples/**/.haxitag/
+coding-scaffold/examples/**/.cursor/
+coding-scaffold/examples/**/AGENTS.md
 
 # testing
 /coverage

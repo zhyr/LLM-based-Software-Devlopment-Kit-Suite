@@ -1,0 +1,32 @@
+{
+  "name": "@haxitag/coding-scaffold",
+  "version": "0.5.2",
+  "private": true,
+  "description": "HaxiTAG coding scaffold: compose prompt+context for private repos (VS Code/Cursor/CodeBuddy/Forge)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhyr/LLM-based-Software-Devlopment-Kit-Suite.git",
+    "directory": "coding-scaffold"
+  },
+  "scripts": {
+    "policy:validate": "python3 tools/policy/validate_workspace.py",
+    "policy:bootstrap": "python3 tools/policy/bootstrap_workspace.py",
+    "compose": "python3 tools/inject/compose_input.py",
+    "inject:context": "python3 tools/inject/resolve_context.py",
+    "privacy:scan": "python3 tools/privacy/redact_workspace.py",
+    "extension:install": "npm --prefix extension install",
+    "extension:package": "npm --prefix extension run package:vsix",
+    "legacy:tree": "python3 tools/legacy/haxitag-structure-Explorer.py"
+  },
+  "keywords": [
+    "haxitag",
+    "coding-scaffold",
+    "compose-input",
+    "private-repo",
+    "forge",
+    "sentinel",
+    "cursor",
+    "vscode"
+  ],
+  "license": "UNLICENSED"
+}

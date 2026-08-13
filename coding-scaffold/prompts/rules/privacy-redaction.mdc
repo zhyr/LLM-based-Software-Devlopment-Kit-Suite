@@ -1,0 +1,17 @@
+---
+description: Privacy via dynamic inject — never rewrite private source
+globs:
+alwaysApply: true
+---
+
+# Privacy / 动态注入（源仓只读）
+
+When preparing context from this private repo for AI coding:
+
+1. **Never modify private-repo source** to「脱敏 / 去噪 / 清理」. Source stays read-only.
+2. Prefer the coding-scaffold package: `tools/inject/resolve_context.py` (or Cursor command **HaxiTAG: Inject Sanitized Context**) — applies 清洗→去噪→脱敏 **in memory**, then injects into Agent context.
+3. Prefer files that pass `.haxitag/workspace-policy.yaml`.
+4. Never dump `.env`, keys, PEM, or credential JSON into chat.
+5. If snippets may contain secrets/PII, mask in the **injection pack** only (same spirit as KnowledgeBase「脱敏、去隐私化」).
+6. Skip lockfiles / minified / coverage noise unless explicitly needed（「去噪」）.
+7. CI / preflight: `tools/privacy/redact_workspace.py` is **scan-only** (report); it must not rewrite `--root`.

@@ -1,0 +1,117 @@
+name: local-dev
+version: 1
+description: >
+  本机 Cursor / Claude Code 开发默认策略。偏保守：排除依赖、构建产物、密钥与常见凭证文件。
+  隐私流水线对齐 HaxiTAG-AI-CMS KnowledgeBase（清洗 / 去噪 / 脱敏）与 logger 敏感键表。
+
+include:
+  - "**/*"
+
+exclude:
+  - "**/.git/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.next/**"
+  - "**/coverage/**"
+  - "**/__pycache__/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "**/*.min.js"
+  - "**/*.map"
+  - "**/package-lock.json"
+  - "**/pnpm-lock.yaml"
+  - "**/yarn.lock"
+  - "**/.DS_Store"
+
+denyNames:
+  - ".env"
+  - ".env.local"
+  - ".env.production"
+  - "*.pem"
+  - "*.key"
+  - "*.p12"
+  - "id_rsa"
+  - "id_ed25519"
+  - "credentials.json"
+  - "service-account.json"
+  - "*secret*"
+  - "*credentials*"
+
+secretPatterns:
+  # validate gate (detect-only); redact uses privacy defaults with safe capture groups
+  - "(?i)-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----"
+  - "(?i)AKIA[0-9A-Z]{16}"
+  - "sk-[A-Za-z0-9]{20,}"
+
+privacy:
+  # Ordered like KnowledgeBase preprocessMethods switch
+  methods:
+    - 清洗
+    - 去噪
+    - 脱敏
+  # inject = in-memory pipeline into Agent context; never rewrite private source
+  mode: inject
+  # logger.ts
+  sensitiveKeys:
+    - password
+    - secret
+    - token
+    - key
+    - authorization
+    - apikey
+    - api_key
+    - access_token
+    - refresh_token
+    - connection_string
+    - mongodb_uri
+    - jwt_secret
+    - nextauth_secret
+    - private_key
+  # preprocess.ts field keys
+  piiFieldKeys:
+    - email
+    - phone
+    - id
+  stripComments: false
+  noiseGlobs:
+    - "**/*.min.js"
+    - "**/*.min.css"
+    - "**/*.map"
+    - "**/package-lock.json"
+    - "**/pnpm-lock.yaml"
+    - "**/yarn.lock"
+    - "**/*.lock"
+    - "**/coverage/**"
+    - "**/__snapshots__/**"
+    - "**/*.snap"
+
+maxFileBytes: 524288
+maxTotalBytes: 8388608
+allowBinary: false
+
+# 输入法（compose-input）开关 — 薄层，默认开清洗类，Sentinel 默认关（可 --sentinel）
+ime:
+  llint: true
+  linear: true
+  align: true
+  enhance: true
+  sentinel: false
+  rules:
+    - 最小必要改动；不改写与任务无关的文件
+    - 命名与仓库约定一致（见 .haxitag/naming-align.yaml）
+
+align:
+  enabled: true
+  mapFile: .haxitag/naming-align.yaml
+
+sentinel:
+  enabled: true
+  # 可选：外部 Sentinel CLI（stdout JSON）或 HTTP
+  # command: "sentinel export --forge-json"
+  # url: "http://127.0.0.1:7788/compose-check"
+
+notes: >
+  主入口：tools/inject/compose_input.py（prompt+context）。
+  validate / privacy scan 仍不改写 --root。
+  Sentinel 默认走本地轻量预检；配置 sentinel.command / SENTINEL_CMD 可接完整 Sentinel。

@@ -1,0 +1,12 @@
+---
+description: Prefer policy-aware context over dumping whole repos
+globs:
+alwaysApply: true
+---
+
+# Context discipline
+
+- Do not dump entire repositories into the chat.
+- Prefer symbol-level or file-level navigation.
+- If a workspace policy file exists (`.haxitag/workspace-policy.yaml`), respect its include/exclude intent.
+- Legacy tools that merge whole trees into one txt are for exceptional offline review only — not the default workflow.

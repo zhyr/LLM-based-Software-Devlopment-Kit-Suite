@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haxitag.com/schemas/coding-scaffold/compose-pack.v1.json",
+  "title": "HaxiTAG Coding Scaffold Compose Pack",
+  "description": "Stable pack for Forge / IDE Agents — prompt + context (+ optional security notes)",
+  "type": "object",
+  "required": ["schema", "schemaVersion", "mode", "sourceUnchanged", "prompt", "context"],
+  "properties": {
+    "schema": { "const": "haxitag.coding-scaffold.pack" },
+    "schemaVersion": { "const": "1" },
+    "mode": { "const": "compose-input" },
+    "sourceUnchanged": { "type": "boolean", "const": true },
+    "root": { "type": "string" },
+    "task": { "type": ["string", "null"] },
+    "prompt": { "type": "string" },
+    "context": {
+      "type": "object",
+      "required": ["blocks"],
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "status"],
+            "properties": {
+              "path": { "type": "string" },
+              "status": { "type": "string" },
+              "reason": { "type": ["string", "null"] },
+              "content": { "type": ["string", "null"] },
+              "methods": { "type": "array", "items": { "type": "string" } },
+              "bytesOriginal": { "type": "integer" },
+              "bytesInjected": { "type": "integer" },
+              "sourceUnchanged": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string" },
+        "status": { "type": "string" },
+        "summary": { "type": "string" },
+        "findings": { "type": "array" },
+        "handoffHint": { "type": "string" }
+      }
+    },
+    "stats": { "type": "object" },
+    "pipeline": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Stages applied: privacy, llint, linear, align, enhance, sentinel"
+    }
+  }
+}

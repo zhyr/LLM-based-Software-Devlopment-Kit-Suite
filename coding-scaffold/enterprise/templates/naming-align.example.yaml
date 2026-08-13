@@ -1,0 +1,7 @@
+# Example naming alignment map (copy to private repo as .haxitag/naming-align.yaml)
+# Keys = legacy / wrong names in snippets; values = team-canonical names.
+version: 1
+map:
+  userId: user_id
+  UserID: user_id
+  getUserInfo: fetch_user_profile

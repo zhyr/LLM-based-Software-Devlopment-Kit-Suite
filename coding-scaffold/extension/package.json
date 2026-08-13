@@ -1,0 +1,118 @@
+{
+  "name": "haxitag-coding-scaffold",
+  "displayName": "HaxiTAG Coding Scaffold",
+  "description": "私有仓 AI Coding Compose 生成高质量 prompt+context；对接 Forge / Sentinel。适用于 VS Code、Cursor、CodeBuddy。",
+  "version": "0.5.2",
+  "publisher": "haxitag",
+  "icon": "media/icon.png",
+  "homepage": "https://haxitag.com/community/forge",
+  "bugs": {
+    "url": "https://github.com/zhyr/LLM-based-Software-Devlopment-Kit-Suite/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "haxitag",
+    "forge",
+    "compose",
+    "inject",
+    "privacy",
+    "sentinel",
+    "private-repo",
+    "prompt",
+    "context",
+    "scaffold"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "haxitagCodingScaffold.composeInput",
+        "title": "HaxiTAG: Compose Input (prompt + context)"
+      },
+      {
+        "command": "haxitagCodingScaffold.injectContext",
+        "title": "HaxiTAG: Inject Sanitized Context only"
+      },
+      {
+        "command": "haxitagCodingScaffold.pathAnnotate",
+        "title": "HaxiTAG: Path Annotate (legacy — writes source)"
+      },
+      {
+        "command": "haxitagCodingScaffold.structureExplore",
+        "title": "HaxiTAG: Structure Explorer (directory tree)"
+      },
+      {
+        "command": "haxitagCodingScaffold.contextBuild",
+        "title": "HaxiTAG: Context Builder (legacy merge file)"
+      },
+      {
+        "command": "haxitagCodingScaffold.openPrompt",
+        "title": "HaxiTAG: Open coding prompt template"
+      },
+      {
+        "command": "haxitagCodingScaffold.openMarkdownPlayground",
+        "title": "HaxiTAG: Open Markdown Playground"
+      },
+      {
+        "command": "haxitagCodingScaffold.openMermaidPlayground",
+        "title": "HaxiTAG: Open Mermaid Playground"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "haxitagCodingScaffold.composeInput",
+          "group": "haxitag@0",
+          "when": "explorerResourceIsFolder || !explorerResourceIsFolder"
+        },
+        {
+          "command": "haxitagCodingScaffold.injectContext",
+          "group": "haxitag@1",
+          "when": "explorerResourceIsFolder || !explorerResourceIsFolder"
+        },
+        {
+          "command": "haxitagCodingScaffold.structureExplore",
+          "group": "haxitag@2",
+          "when": "explorerResourceIsFolder"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "haxitagCodingScaffold.composeInput",
+          "group": "haxitag@0"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "prepare-resources": "node scripts/prepare-resources.js",
+    "vscode:prepublish": "npm run prepare-resources && npm run compile",
+    "package": "node scripts/package-vsix.js",
+    "package:vsix": "node scripts/package-vsix.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhyr/LLM-based-Software-Devlopment-Kit-Suite.git",
+    "directory": "coding-scaffold/extension"
+  },
+  "galleryBanner": {
+    "color": "#0B1F33",
+    "theme": "dark"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.0",
+    "typescript": "^5.3.3"
+  }
+}

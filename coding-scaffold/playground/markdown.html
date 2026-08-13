@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HaxiTAG Coding Scaffold — Markdown Playground</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root { color-scheme: light dark; --bg: #0f1419; --panel: #1a2332; --fg: #e7ecf3; --muted: #8b9bb4; --acc: #3d8bfd; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+    header { padding: 12px 16px; border-bottom: 1px solid #2a3548; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+    header a { color: var(--acc); text-decoration: none; }
+    header .muted { color: var(--muted); font-size: 12px; }
+    main { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 52px); }
+    textarea, #preview { padding: 16px; margin: 0; border: 0; outline: none; min-height: 100%; }
+    textarea { background: var(--panel); color: var(--fg); font: 13px/1.45 ui-monospace, monospace; resize: none; border-right: 1px solid #2a3548; }
+    #preview { background: #121820; overflow: auto; }
+    #preview pre { background: #0b1016; padding: 10px; overflow: auto; }
+    #preview code { font-family: ui-monospace, monospace; font-size: 12px; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } textarea { border-right: 0; border-bottom: 1px solid #2a3548; min-height: 40vh; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Markdown Playground</h1>
+    <span class="muted">HaxiTAG Coding Scaffold · 预览 Compose 产出</span>
+    <a href="mermaid.html">Mermaid →</a>
+    <a href="https://haxitag.com/community/forge" target="_blank" rel="noopener">Forge</a>
+  </header>
+  <main>
+    <textarea id="src" spellcheck="false"># Compose pack preview
+
+粘贴 `HaxiTAG: Compose Input` 生成的 Markdown，左侧编辑、右侧预览。
+
+## Task
+修复登录校验
+
+## Context
+
+```ts
+export function checkSession(token: string): boolean {
+  return Boolean(token);
+}
+```
+</textarea>
+    <article id="preview"></article>
+  </main>
+  <script>
+    const src = document.getElementById('src');
+    const preview = document.getElementById('preview');
+    function render() {
+      preview.innerHTML = marked.parse(src.value || '');
+    }
+    src.addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>
