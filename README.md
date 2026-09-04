@@ -66,6 +66,14 @@ cd coding-scaffold/extension && npm install && npm run package:vsix
 
 ---
 
+## 配套独立仓库（同系工具）
+
+| 仓库 | 说明 |
+|------|------|
+| [Perch（栖痕）](https://github.com/zhyr/Perch) | macOS 菜单栏剪贴板记录管理器：将 LLM 交互中的重复指令上下文、任务主干/分支提示词、待处理任务队列与历史交互提示词按「记录树 + 分段」成系列管理，可整树一键复制回喂；数据目录指向 iCloud Drive 即可多设备同步 |
+
+---
+
 ## Playground（Markdown / Mermaid）
 
 扩展 **Details 页是静态 README**，无法在说明页内嵌交互预览。  
